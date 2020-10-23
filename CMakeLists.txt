@@ -4,7 +4,7 @@ IF(APPLE)
     SET(TOOLCHAIN_PREFIX "/usr/local") # Set depending on System (f.e. Homebrew)
 ENDIF()
 
-PROJECT(STM32-TFLM-Micro-Speech LANGUAGES C CXX)
+PROJECT(STM32-TFLM-TinyFace LANGUAGES C CXX)
 
 SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -68,11 +68,11 @@ ENDIF()
 # Disable MBED (Only valid for Tensorflow Toolchain)
 ADD_DEFINITIONS(-DNOMBED)
 
-### Configure 'micro_speech' Example ###
+### Configure 'TinyFace' Example ###
 SET(FAKE_MIC OFF) # Use SD Card instead of Microphone
 ADD_DEFINITIONS(-DMICRO_SPEECH_EXAMPLE)
 ADD_DEFINITIONS(-DFIXED_POINT=16)
-ADD_DEFINITIONS(-DTFLM_EXAMPLE="mirco_speech" -DTFLM_BOARD="${TFLM_BOARD}")
+ADD_DEFINITIONS(-DTFLM_EXAMPLE="TinyFace" -DTFLM_BOARD="${TFLM_BOARD}")
 IF(${FAKE_MIC})
   ADD_DEFINITIONS(-DFAKE_MIC -DTFLM_FILE_EXT="*.wav")
 ENDIF()
