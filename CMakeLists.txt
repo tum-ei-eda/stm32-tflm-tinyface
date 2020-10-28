@@ -4,7 +4,7 @@ IF(APPLE)
     SET(TOOLCHAIN_PREFIX "/usr/local") # Set depending on System (f.e. Homebrew)
 ENDIF()
 
-PROJECT(STM32-TFLM-TinyFace LANGUAGES C CXX)
+PROJECT(STM32-TFLM-MNIST LANGUAGES C CXX)
 
 SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -68,32 +68,32 @@ ENDIF()
 # Disable MBED (Only valid for Tensorflow Toolchain)
 ADD_DEFINITIONS(-DNOMBED)
 
-### Configure 'TinyFace' Example ###
-SET(FAKE_MIC OFF) # Use SD Card instead of Microphone
-ADD_DEFINITIONS(-DMICRO_SPEECH_EXAMPLE)
-ADD_DEFINITIONS(-DFIXED_POINT=16)
-ADD_DEFINITIONS(-DTFLM_EXAMPLE="TinyFace" -DTFLM_BOARD="${TFLM_BOARD}")
-IF(${FAKE_MIC})
-  ADD_DEFINITIONS(-DFAKE_MIC -DTFLM_FILE_EXT="*.wav")
+### Configure 'mnist' Example ###
+SET(FAKE_TOUCH ON) # Use SD Card instead of Touchscreen
+ADD_DEFINITIONS(-DTFLM_EXAMPLE="mnist" -DTFLM_BOARD="${TFLM_BOARD}")
+IF(${FAKE_TOUCH})
+  ADD_DEFINITIONS(-DFAKE_TOUCH -DTFLM_FILE_EXT="*.bmp")
 ENDIF()
 
-### Edit User/Name for using a custom Repository ###
-SET(CUBE_REPO_USER "STMicroelectronics")
-SET(CUBE_REPO_NAME "STM32Cube${STM32_FAMILY}")
+IF(NOT STM32Cube_DIR)
+  ### Edit User/Name for using a custom Repository ###
+  SET(CUBE_REPO_USER "STMicroelectronics")
+  SET(CUBE_REPO_NAME "STM32Cube${STM32_FAMILY}")
 
-# Fetching Cube Firmware Repository
-FIND_PACKAGE(Git REQUIRED)
-SET(CUBE_SOURCE "${CMAKE_BINARY_DIR}/STM32${STM32_FAMILY}-Cube-Firmware")
-IF(EXISTS ${CUBE_SOURCE})
-  MESSAGE(STATUS "Cube FW directory exists")
-ELSE()
-  MESSAGE(STATUS "Getting Cube Firmware")
-  SET(GIT_REPOSITORY
-  "https://github.com/${CUBE_REPO_USER}/${CUBE_REPO_NAME}.git")
-  EXECUTE_PROCESS(COMMAND
-  ${GIT_EXECUTABLE} clone ${GIT_REPOSITORY} ${CUBE_SOURCE})
+  # Fetching Cube Firmware Repository
+  FIND_PACKAGE(Git REQUIRED)
+  SET(CUBE_SOURCE "${CMAKE_BINARY_DIR}/STM32${STM32_FAMILY}-Cube-Firmware")
+  IF(EXISTS ${CUBE_SOURCE})
+    MESSAGE(STATUS "Cube FW directory exists")
+  ELSE()
+    MESSAGE(STATUS "Getting Cube Firmware")
+    SET(GIT_REPOSITORY
+    "https://github.com/${CUBE_REPO_USER}/${CUBE_REPO_NAME}.git")
+    EXECUTE_PROCESS(COMMAND
+    ${GIT_EXECUTABLE} clone ${GIT_REPOSITORY} ${CUBE_SOURCE})
+  ENDIF()
+  SET(STM32Cube_DIR ${CUBE_SOURCE})
 ENDIF()
-SET(STM32Cube_DIR ${CUBE_SOURCE})
 
 # Prepare Tensorflow Lite (micro)
 #SET(TF_COMMIT d6426459bca2971b611ca9773858e55f6cc1a9af) # TODO
@@ -117,17 +117,17 @@ ENDIF()
 
 ### Configure STM32 HAL/BSP/LL ###
 IF(${TFLM_BOARD} STREQUAL "disco_f413zh")
-  FIND_PACKAGE(STM32HAL COMPONENTS sram gpio uart fmpi2c i2s
-  dac adc dfsdm sd dma qspi REQUIRED)
+  FIND_PACKAGE(STM32HAL COMPONENTS sram gpio uart fmpi2c
+  dfsdm sd dma qspi REQUIRED)
   FIND_PACKAGE(STM32LL COMPONENTS fsmc sdmmc REQUIRED)
-  FIND_PACKAGE(STM32BSP COMPONENTS ts lcd audio ili9325 stmpe811
+  FIND_PACKAGE(STM32BSP COMPONENTS ts lcd ili9325 stmpe811
   st7789h2 ft6x06 wm8994 psram sd REQUIRED)
 ELSEIF(${TFLM_BOARD} STREQUAL "disco_f769ni")
-  FIND_PACKAGE(STM32HAL COMPONENTS sram gpio uart i2s dac adc
-  dfsdm sd dma dma2d qspi dsi ltdc sdram sai i2c REQUIRED)
+  FIND_PACKAGE(STM32HAL COMPONENTS sram gpio uart
+  dfsdm sd dma qspi dsi i2c sdram dma2d ltdc REQUIRED)
   FIND_PACKAGE(STM32LL COMPONENTS fmc sdmmc REQUIRED)
-  FIND_PACKAGE(STM32BSP COMPONENTS ts lcd audio stmpe811
-  st7789h2 ft6x06 wm8994 sdram sd otm8009a REQUIRED)
+  FIND_PACKAGE(STM32BSP COMPONENTS ts lcd
+  ft6x06 sdram sd otm8009a REQUIRED)
 ENDIF()
 
 # Gather all project source files
@@ -138,8 +138,6 @@ FILE(GLOB EXAMPLE_SOURCES
     "Src/misc/*.cc"
     "Src/misc/benchmarking/*.c"
     "Src/misc/benchmarking/*.cc"
-    "Src/micro_features/*.c"
-    "Src/micro_features/*.cc"
     "Src/${TFLM_BOARD}/*.c"
     "Src/${TFLM_BOARD}/*.cc"
     )

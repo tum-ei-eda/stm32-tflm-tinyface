@@ -1,23 +1,26 @@
 # Media
 
-If microphone input is not deterministic/reliable enough for the 'Micro Speech' example, optionally real samples from the dataset can be fed into the neural network. The following sections should explain to to make use of this feature.
+If touchscreen input is not deterministic/reliable enough for the 'MNIST' example, optionally real samples from the dataset can be fed into the neural network. The following sections should explain to to make use of this feature.
 
 ## Requirements
 
 - (Empty) SD-Card (f.e. 2GB), formatted with FATFS
 - Software:
-  - `wget`, `tar` (should be installed by default on any UNIX system)
-  - `sox` (See: [http://sox.sourceforge.net](http://sox.sourceforge.net))
+  - `wget`, `gzip` (should be installed by default on any UNIX system) (TODO)
+  - `python3` (with `pip` and modules listed in [`requirements.txt`](TODO))
+```
+python3 -m pip install -r requirements.txt
+```
 
 ## Configure CMake
 
 0. Check if your board is compatible. See: [Boards](TODO)
 
-1. Edit `CMakeLists.txt` an make sure, that the `FAKE_MIC` option is enabled
+1. Edit `CMakeLists.txt` an make sure, that the `FAKE_TOUCH` option is enabled
 
 ```
-### Configure 'micro_speech' Example ###
-SET(FAKE_MIC ON) # Use SD Card instead of Microphone
+### Configure 'mnist' Example ###
+SET(FAKE_TOUCH ON) # Use SD Card instead of Microphone
 ...
 ```
 
@@ -34,46 +37,54 @@ make flash
 
 ### Why can't I just use the original dataset
 
-STM's Board Support Package Driver does only support to play 16 bit stereo WAV-Files via the audio codec, the samples in the [original dataset](https://arxiv.org/abs/1804.03209) are encoded with a single channel (mono) 16 bit format.
+STM's Board Support Package Driver does only support to draw 16 bit RGB(565) encoded BMP-Files on the LCD, the samples in the [original dataset](TODO) are encoded with 8-bit grayscale values.
+
+**Warning:** The Neural Network is trained with images of white numbers from 0-9 on a black background. Often the inverted version of this is shown which can result in wrong behavior!
 
 ### Steps
 
-1. Download and extract dataset. As it's quite large, this will take some time. You may want to extract it somewhere outside of this repository, e.g. under `/tmp/`
+1. Download and extract the dataset consisting of images and labels from [http://yann.lecun.com/exdb/mnist/](http://yann.lecun.com/exdb/mnist/)
 
 ```
-mkdir /tmp/micro_speech_dataset
-cd /tmp/micro_speech_dataset
-wget http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz
-tar xf speech_commands_v0.02.tar.gz
-mv speech_commands_v0.02 /tmp/speech_commands_v0.02
-rm speech_commands_v0.02.tar.gz
+mkdir /tmp/mnist_temp
+cd /tmp/mnist_temp
+wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
+gzip -d train-images-idx3-ubyte.gz
+gzip -d train-labels-idx1-ubyte.gz
 cd -
 ```
 
-2. Instead of converting the wave files by hand and manually picking files to use, the script `gen_micro_speech_files.sh` can do that for you using the following line of code:
+**Warning:** While the file sizes in the dataset are quite small, the total number of files is very large, which makes some systems crash when opening the directory.
+
+2. Now the binary samples can be exported as BMP-Files. The export and format conversion can be done running the following command which may run for several minutes because of the large number of files:
 
 ```
-mkdir -p output/micro_speech
-rm -f output/micro_speech/* # Remove old files
-./gen_micro_speech_files.sh /tmp/micro_speech_dataset ./output/micro_speech yes,no 5
+mkdir /tmp/mnist_dataset
+python3 convert_mnist_dataset.py /tmp/mnist_temp/train-images-idx3-ubyte /tmp/mnist_temp/train-labels-idx1-ubyte /tmp/mnist_dataset
 ```
 
-*Short Manual:* `Usage: ./gen_micro_speech_files.sh [DATASET_DIR] [OUTPUT_DIR] [COMMANDS] [COUNT]`
+*Short Manual:* `Usage: ./convert_mnist_files.py [IMAGES_DATA] [LABELS_DATA] [OUTPUT_DIR]`
+
+3. After exporting and converting the image files, instead manually picking files to use, the script `gen_mnist_files.sh` can select a random set of samples for you using the following line of code:
+ 
+```
+mkdir -p output/mnist
+rm -f output/mnist/* # Remove old files
+./gen_mnist_files.sh /tmp/mnist_dataset ./output/mnist 10
+```
+
+*Short Manual:* `Usage: ./gen_mnist_files.sh [DATASET_DIR] [OUTPUT_DIR] [COUNT]`
 
 ## Setup SD-Card
 
-Copy the `micro_speech` directory either from the `media/output/` directory or from where you extracted the contents of [`sd_card.zip`](https://raw.githubusercontent.com/PhilippvK/stm32-tflm-demos/master/media/sd_card.zip) to directory to the root directory of the SD card.
+Copy the `mnist` directory either from the `media/output/` directory or from where you extracted the contents of [`sd_card.zip`](https://raw.githubusercontent.com/PhilippvK/stm32-tflm-demos/master/media/sd_card.zip) to directory to the root directory of the SD card.
 
 
 ## Run the Program
 
-Up to 16 `*.wav` files found in the `micro_speech` directory on the SD-Card are played back via the headphone jack and feed into the Neural Network. The current 1 second-long input sample changes every 3-5 seconds.
+Up to 16 `*.bmp` files found in the `mnist` directory on the SD-Card displayed at the center of the screen and feed into the Neural Network. The classification probabilities are printed for a short moment before the next image of the SD-Card is chosen automatically.
 
-**Warning:** The network performs especially bad if the current sample changes, as the audio player has to be re-initialized to fetch a new wave file from the external media.
+The name of the current file is displayed on the touchscreen. Additionally all files found when reading the directory are printed on UART before the network starts.
 
-The name of the currently played file is displayed on the touchscreen. And all files found when reading the directory are printed on UART before the network starts.
-
-## Known Issues
-
- - As mentioned before, the transitions between samples is quite buggy and still needs some optimazions
- - Feeding silent wave data does not result in `silence` beeing detected. Maybe a Volume-Normalization problem?
+To make debugging more easy, an ASCII-like representation of the images can be printed to UART as well. (See example in [`USAGE.md`](TODO))

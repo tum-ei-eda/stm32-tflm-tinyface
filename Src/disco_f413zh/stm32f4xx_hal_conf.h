@@ -1,20 +1,17 @@
 /**
   ******************************************************************************
-  * @file    stm32f4xx_hal_conf_template.h
-  * @author  MCD Application Team
-  * @brief   HAL configuration template file.
-  *          This file should be copied to the application folder and renamed
-  *          to stm32f4xx_hal_conf.h.
+  * @file    stm32f4xx_hal_conf.h
+  * @author  (partially) MCD Application Team
+  * @author  Philipp v. K. <philipp.van-kempen@tum.de>
+  * @brief   HAL configuration
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * [Copyright (c) 2020 STMicroelectronics]
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * Modifications by @PhilippvK
+  * - Changed enabled/disabled Modules according to CMakeLists.txt
+  * - Changed formatting according to cpplint
   *
   ******************************************************************************
   */
@@ -45,17 +42,20 @@
 /* #define HAL_DAC_MODULE_ENABLED    */
 #define HAL_DFSDM_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
+/* #define HAL_DMA2D_MODULE_ENABLED  */
 #define HAL_FLASH_MODULE_ENABLED
 #define HAL_FMPI2C_MODULE_ENABLED
 #define HAL_GPIO_MODULE_ENABLED
 /* #define HAL_HCD_MODULE_ENABLED    */
 /* #define HAL_IRDA_MODULE_ENABLED   */
 /* #define HAL_IWDG_MODULE_ENABLED   */
+/* #define HAL_LTDC_MODULE_ENABLED   */
 #define HAL_I2C_MODULE_ENABLED
 #define HAL_I2S_MODULE_ENABLED
 /* #define HAL_NAND_MODULE_ENABLED   */
 /* #define HAL_NOR_MODULE_ENABLED    */
 /* #define HAL_PCCARD_MODULE_ENABLED */
+/* #define HAL_SDRAM_MODULE_ENABLED */
 /* #define HAL_PCD_MODULE_ENABLED    */
 #define HAL_PWR_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED

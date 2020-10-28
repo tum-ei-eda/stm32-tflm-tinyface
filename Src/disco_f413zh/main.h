@@ -1,20 +1,18 @@
 /**
   ******************************************************************************
   * @file           : main.h
-  * @brief          : Header for main.c file.
+  * @author         : Philipp v. K. <philipp.van-kempen@tum.de>
+  * @brief          : Header for main.cc file.
   *                   This file contains the common defines of the application.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * The file was originally generated with
+  * STM32CubeIDE [Copyright (c) 2020 STMicroelectronics]
+  * but modified intensively.
   *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
+  * Copyright 2020 <TODO>
   *
-  * TODO
   ******************************************************************************
   */
 
@@ -36,7 +34,7 @@ extern "C" {
 #include "stm32f413h_discovery_lcd.h"
 #include "stm32f413h_discovery_ts.h"
 #include "stm32f413h_discovery_audio.h"
-#include  "stm32f413h_discovery_sd.h"
+#include "stm32f413h_discovery_sd.h"
 
 /* Touchscreen Includes */
 #include "ts_calibration.h"
@@ -45,11 +43,14 @@ extern "C" {
 #include "ff_gen_drv.h"
 #include "sd_diskio.h"
 
-/* AudioPlayer Includes */
-#include "audio_playback.h"
+#ifdef FAKE_TOUCH
+/* ImageViewer Includes */
+#include "image_show.h"
+#endif /* FAKE_TOUCH */
 
-// TODO
-//#include "misc.h"
+// TODO(PhilippvK): Comment
+#include "misc.h"
+#include "bsp.h"
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -57,6 +58,8 @@ extern "C" {
 #define MX_UART_Init MX_USART6_UART_Init
 
 /* Exported macro ------------------------------------------------------------*/
+// 565 - 16 bit
+#define GS2RGB(x) (uint16_t)(((x >> 3) << 11)|((x >> 2) << 5)|(x >> 3))
 
 /* Exported functions prototypes ---------------------------------------------*/
 int __io_putchar(int ch);
