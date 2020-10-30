@@ -76,12 +76,12 @@ void PreprocessImage(void) {
   }
 }
 
-uint8_t ConvertHighColorToGS(uint16_t pixel) {
-  uint8_t r = pixel >> 11 & 0x1F;
-  uint8_t g = pixel >> 5 & 0x3F;
-  uint8_t b = pixel & 0x1F;
-  uint8_t luminance = (r + (g>>1) + b) / 3;
-  uint8_t gs = luminance * (255 / 31.0);
+uint8_t ConvertHighColorToGS(uint32_t pixel) {
+  uint8_t r = pixel >> 16 & 0xFF;
+  uint8_t g = pixel >> 8 & 0xFF;
+  uint8_t b = pixel & 0xFF;
+  uint8_t luminance = (r + g + b) / 3;
+  uint8_t gs = luminance;
   return gs;
 }
 
@@ -114,7 +114,7 @@ void SendImageUART(void *image, size_t pixel_size, size_t image_size,
       }
     }
     buffer[image_size] = '|';
-    // fprintf(stderr, "%s\n\r", buffer); // Printing Image 
+    fprintf(stderr, "%s\n\r", buffer); // Printing Image 
   }
   fprintf(stderr, "**********IMAGE STOP**********\n\r");
   free(buffer);
@@ -287,7 +287,7 @@ void MNISTHandleOutput(int8_t* output_array) {
   char buff[10] = { 0 };
   BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
   BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
-  sprintf(buff, "Char: %c", prev_value);  // TODO(PhilippvK): snprintf
+  // sprintf(buff, "Char: %c", prev_value);  // TODO(PhilippvK): snprintf
   BSP_LCD_DisplayStringAt(0,
         INPUT_BOX_Y_OUTER + INPUT_IMAGE_SIZE - 20,
         (uint8_t *)buff, CENTER_MODE);
@@ -295,5 +295,6 @@ void MNISTHandleOutput(int8_t* output_array) {
   printPercentages(output_array);
 #ifdef FAKE_TOUCH
   HAL_Delay(100);
+  // BSP_LCD_Clear(uint32_t LCD_COLOR_WHITE);
 #endif /* FAKE_TOUCH */
 }
